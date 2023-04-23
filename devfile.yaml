@@ -1,5 +1,89 @@
-schemaVersion: 2.1.0
+commands:
+- attributes:
+    api.devfile.io/imported-from: 'uri: devfile-parent.yaml'
+  exec:
+    commandLine: npm install
+    component: runtime
+    group:
+      isDefault: true
+      kind: build
+    workingDir: /project
+  id: install
+- attributes:
+    api.devfile.io/imported-from: 'uri: devfile-parent.yaml'
+  exec:
+    commandLine: npm start
+    component: runtime
+    group:
+      isDefault: true
+      kind: run
+    workingDir: /project
+  id: run
+- attributes:
+    api.devfile.io/imported-from: 'uri: devfile-parent.yaml'
+  exec:
+    commandLine: npm run debug
+    component: runtime
+    group:
+      isDefault: true
+      kind: debug
+    workingDir: /project
+  id: debug
+- attributes:
+    api.devfile.io/imported-from: 'uri: devfile-parent.yaml'
+  exec:
+    commandLine: npm test
+    component: runtime
+    group:
+      isDefault: true
+      kind: test
+    workingDir: /project
+  id: test
+components:
+- attributes:
+    api.devfile.io/imported-from: 'uri: devfile-parent.yaml'
+  container:
+    endpoints:
+    - name: http-8080
+      targetPort: 8080
+    image: registry.access.redhat.com/ubi8/nodejs-14:latest
+    memoryLimit: 1024Mi
+    mountSources: true
+    sourceMapping: /project
+  name: runtime
+- kubernetes:
+    inlined: |
+      apiVersion: binding.operators.coreos.com/v1alpha1
+      kind: ServiceBinding
+      metadata:
+        creationTimestamp: null
+        name: child-my-postgresql
+      spec:
+        application:
+          group: apps
+          kind: Deployment
+          name: child-app
+          version: v1
+        bindAsFiles: false
+        detectBindingResources: true
+        services:
+        - group: postgresql.k8s.enterprisedb.io
+          id: child-my-postgresql
+          kind: Cluster
+          name: my-postgresql
+          namespace: shared-services
+          resource: clusters
+          version: v1
+      status:
+        secret: ""
+  name: child-my-postgresql
 metadata:
   name: child
-parent:
-  uri: devfile-parent.yaml
+schemaVersion: 2.1.0
+starterProjects:
+- attributes:
+    api.devfile.io/imported-from: 'uri: devfile-parent.yaml'
+  git:
+    remotes:
+      origin: https://github.com/odo-devfiles/nodejs-ex.git
+  name: nodejs-starter
